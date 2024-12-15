@@ -31,9 +31,9 @@ public class GameManager : MonoBehaviour
 
         }
 
-        if(score == 13)
+        if(score >= 20)
         {
-            SceneManager.LoadScene(2);
+           SceneManager.LoadScene(2);
 
         }
     }

@@ -16,6 +16,13 @@ public class PlayerController : MonoBehaviour
     public AudioClip coinSound;
     public AudioClip bounce;
     public AudioClip death;
+    public ParticleSystem particle;
+
+    public SpriteRenderer sr;
+    public SpriteRenderer eye1;
+    public SpriteRenderer eye2;
+    public bool isDead;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -25,13 +32,15 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+        if (isDead)
+            return;
         Vector3 newPosition = transform.position;
 
         //variables to mirror the player
         Vector3 newScale = transform.localScale;
         float currentScale = Mathf.Abs(transform.localScale.x); //take absolute value of the current x scale, this is always positive
 
-
+       
         if (Input.GetKey("a") || Input.GetKey(KeyCode.LeftArrow))
         {
             newPosition.x -= speed;
@@ -71,9 +80,9 @@ public class PlayerController : MonoBehaviour
             gameManager.deathTime = true;
             gameManager.deathCount += 1;
             soundEffects.PlayOneShot(death, 0.4f);
-
-            Destroy(gameObject);
-
+            particle.Play();
+            isDead = true;
+            StartCoroutine(DeathTimer(1f));
         }
 
 
@@ -87,19 +96,46 @@ public class PlayerController : MonoBehaviour
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.tag == "Coin")
+        if (collision.gameObject.tag == "IncreaseCoin")
         {
             gameManager.score += 1;
             GameObject coin = collision.gameObject;
             soundEffects.PlayOneShot(coinSound, 0.4f);
-
+            jumpForce += 2;
             Destroy(coin);
 
            //there has to be a downside for shrinking
            //coin can make you shrink, coin can reset your size?
            //shrinking coins make controlls more slippery, and less momentum, maybe shorter jump?
         }
+
+
+        if (collision.gameObject.tag == "DecreaseCoin")
+        {
+            gameManager.score += 1;
+            GameObject coin = collision.gameObject;
+            soundEffects.PlayOneShot(coinSound, 0.4f);
+            jumpForce -= 2;
+            Destroy(coin);
+
+            //there has to be a downside for shrinking
+            //coin can make you shrink, coin can reset your size?
+            //shrinking coins make controlls more slippery, and less momentum, maybe shorter jump?
+        }
     }
     
-    
+    public IEnumerator DeathTimer(float duration)
+    {
+        rb.bodyType = RigidbodyType2D.Static;
+        anim.enabled = false;
+        sr.enabled = false;
+        eye1.enabled = false;
+        eye2.enabled = false;
+
+        yield return new WaitForSeconds(duration);
+        Destroy(gameObject);
+
+
     }
+
+}

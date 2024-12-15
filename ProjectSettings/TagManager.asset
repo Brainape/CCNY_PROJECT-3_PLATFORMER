@@ -9,6 +9,8 @@ TagManager:
   - Death
   - StartGame
   - EndGame
+  - IncreaseCoin
+  - DecreaseCoin
   layers:
   - Default
   - TransparentFX
